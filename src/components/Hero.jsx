@@ -1,4 +1,6 @@
+import { useNavigate } from "react-router-dom";
 export default function Hero() {
+    const navigate = useNavigate();
   return (
     <section className="relative flex flex-col items-center justify-center text-center min-h-[85vh] overflow-hidden">
 
@@ -24,13 +26,19 @@ export default function Hero() {
 
         <div className="flex gap-4 justify-center mt-8">
 
-          <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl">
+          <button
+            onClick={() => navigate("/project")}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl"
+            >
             Project Mentor →
-          </button>
+            </button>
 
-          <button className="border border-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-600">
+          <button
+            onClick={() => navigate("/placement")}
+            className="border border-purple-600 text-white px-6 py-3 rounded-xl"
+            >
             Placement Mentor →
-          </button>
+            </button>
 
         </div>
 
