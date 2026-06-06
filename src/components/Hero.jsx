@@ -1,0 +1,41 @@
+export default function Hero() {
+  return (
+    <section className="relative flex flex-col items-center justify-center text-center min-h-[85vh] overflow-hidden">
+
+      {/* Purple Glow */}
+      <div className="absolute w-[500px] h-[500px] bg-purple-600 rounded-full blur-[150px] opacity-30"></div>
+
+      {/* Content */}
+      <div className="relative z-10">
+
+        <div className="inline-block px-4 py-1 rounded-full bg-purple-600 text-white mb-6">
+          New
+        </div>
+
+        <h1 className="text-white text-7xl font-bold">
+          Intelligent Mentors
+          <br />
+          For Students
+        </h1>
+
+        <p className="text-gray-400 mt-5 text-lg">
+          AI-powered project guidance and placement preparation.
+        </p>
+
+        <div className="flex gap-4 justify-center mt-8">
+
+          <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl">
+            Project Mentor →
+          </button>
+
+          <button className="border border-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-600">
+            Placement Mentor →
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+  );
+}
