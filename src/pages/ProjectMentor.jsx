@@ -243,7 +243,7 @@ setQuestion("");
                 className="
                   w-full
                   bg-zinc-900
-                  text-white
+                  text-grey
                   backdrop-blur-md
                   border
                   border-white/10
