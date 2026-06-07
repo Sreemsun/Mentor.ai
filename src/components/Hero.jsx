@@ -10,8 +10,8 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10">
 
-        <div className="inline-block px-4 py-1 rounded-full bg-purple-600 text-white mb-6">
-          New
+        <div className="inline-block px-4 py-1 rounded-full bg-purple-500 text-white mb-6">
+          Guiding Your Path to Success
         </div>
 
         <h1 className="text-white text-7xl font-bold">
@@ -21,8 +21,7 @@ export default function Hero() {
         </h1>
 
         <p className="text-gray-400 mt-5 text-lg">
-          AI-powered project guidance and placement preparation.
-        </p>
+          AI-powered project guidance and placement support for students.        </p>
 
         <div className="flex gap-4 justify-center mt-8">
 
@@ -35,7 +34,7 @@ export default function Hero() {
 
           <button
             onClick={() => navigate("/placement")}
-            className="border border-purple-600 text-white px-6 py-3 rounded-xl"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl"
             >
             Placement Mentor →
             </button>

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { generateRoadmap } from "../services/projectService";
 
 import {
   FaArrowLeft,
@@ -11,28 +12,98 @@ import { MdOutlineWorkOutline } from "react-icons/md";
 
 export default function ProjectMentor() {
   const navigate = useNavigate();
+  const chatEndRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
-
+  const [roadmapData, setRoadmapData] = useState(null);
   const [projectIdea, setProjectIdea] = useState("");
   const [experienceLevel, setExperienceLevel] = useState("Beginner");
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [asking, setAsking] = useState(false);
+useEffect(() => {
+  chatEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [messages]);
+  const handleGenerate = async () => {
+  if (!projectIdea.trim()) {
+    alert("Please enter a project idea");
+    return;
+  }
 
-  const handleGenerate = () => {
-    if (!projectIdea.trim()) {
-      alert("Please enter a project idea");
-      return;
-    }
-
+  try {
     setLoading(true);
     setShowResult(false);
 
-    setTimeout(() => {
-      setLoading(false);
-      setShowResult(true);
-    }, 2000);
-  };
+    const result = await generateRoadmap(
+      projectIdea,
+      experienceLevel
+    );
+    console.log(result);
 
+    setRoadmapData(result);
+    setMessages([
+  {
+    role: "assistant",
+    content:
+      "Hi! I'm your AI Project Mentor. Ask me anything about this roadmap, technologies, architecture, database design, deployment, or implementation."
+  }
+]);
+    setLoading(false);
+    setShowResult(true);
+  } catch (error) {
+    console.error(error);
+
+    setLoading(false);
+
+    alert("Failed to generate roadmap");
+  }
+};
+const handleAskAI = async () => {
+  if (!question.trim()) return;
+
+  try {
+    setAsking(true);
+
+    const response = await fetch(
+      "http://127.0.0.1:8000/api/project/ask",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectIdea,
+          roadmap: roadmapData,
+          question,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    setMessages((prev) => [
+  ...prev,
+  {
+    role: "user",
+    content: question,
+  },
+  {
+    role: "assistant",
+    content: data.answer,
+  },
+]);
+
+setQuestion("");
+  } catch (error) {
+    console.error(error);
+    console.error("Failed to get answer");
+  }
+
+  setAsking(false);
+};
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       {/* Glow */}
@@ -143,9 +214,9 @@ export default function ProjectMentor() {
 
               <textarea
                 value={projectIdea}
-                onChange={(e) => setProjectIdea(e.target.value)}
                 rows="6"
                 placeholder="Example: AI Hostel Management System"
+                onChange={(e) => setProjectIdea(e.target.value)}
                 className="
                   w-full
                   bg-white/5
@@ -272,13 +343,9 @@ export default function ProjectMentor() {
                   Project Overview
                 </h3>
 
-                <p>
-                  <strong>Project:</strong> {projectIdea}
-                </p>
-
-                <p className="mt-3">
-                  <strong>Experience:</strong> {experienceLevel}
-                </p>
+                <p className="text-gray-300 whitespace-pre-wrap">
+  {roadmapData?.overview}
+</p>
               </div>
 
               {/* Architecture */}
@@ -287,24 +354,9 @@ export default function ProjectMentor() {
                   Suggested Architecture
                 </h3>
 
-                <pre className="text-gray-300 overflow-auto whitespace-pre-wrap">
-{`Frontend
-├── React
-├── Tailwind CSS
-└── Axios
-
-Backend
-├── Node.js
-├── Express
-└── REST API
-
-Database
-└── MySQL
-
-Deployment
-├── Vercel
-└── Render`}
-                </pre>
+                <p className="text-gray-300 whitespace-pre-wrap">
+  {roadmapData?.architecture}
+</p>
               </div>
 
               {/* Cards */}
@@ -315,52 +367,86 @@ Deployment
                     Recommended Stack
                   </h3>
 
-                  <ul className="space-y-2">
-                    <li>React</li>
-                    <li>Node.js</li>
-                    <li>MySQL</li>
-                    <li>Tailwind CSS</li>
-                  </ul>
+                  <div className="mt-6 space-y-4 max-h-[500px] overflow-y-auto">
+  {roadmapData?.techStack?.map((item, index) => (
+    <div
+      key={index}
+      className="bg-white/5 p-4 rounded-lg border border-white/10"
+    >
+      <h4 className="text-purple-300 font-semibold text-lg">
+        {item.name}
+      </h4>
+
+      <p className="text-gray-400 mt-2">
+        {item.reason}
+      </p>
+    </div>
+  ))}
+</div>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 max-h-[600px] overflow-y-auto">
                   <h3 className="text-purple-400 mb-6">
                     Development Roadmap
                   </h3>
 
                   <ul className="space-y-2">
-                    <li>Phase 1: Planning</li>
-                    <li>Phase 2: Database Design</li>
-                    <li>Phase 3: Backend Development</li>
-                    <li>Phase 4: Frontend Development</li>
-                    <li>Phase 5: Deployment</li>
-                  </ul>
+  {roadmapData?.roadmap?.map((item, index) => (
+    <li key={index}>{item}</li>
+  ))}
+</ul>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                  <h3 className="text-purple-400 mb-6">
-                    Database Design
-                  </h3>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 max-h-[600px] overflow-y-auto">
+  <h3 className="text-purple-400 mb-6">
+    Database Design
+  </h3>
 
-                  <ul className="space-y-2">
-                    <li>Users</li>
-                    <li>Projects</li>
-                    <li>Roadmaps</li>
-                    <li>History</li>
-                  </ul>
-                </div>
+  <h4 className="font-semibold mb-3">
+    Collections
+  </h4>
 
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+  <ul className="space-y-2 mb-6">
+    {roadmapData?.database?.collections?.map(
+      (collection, index) => (
+        <li key={index}>
+          • {collection}
+        </li>
+      )
+    )}
+  </ul>
+
+  <h4 className="font-semibold mb-3">
+    Fields
+  </h4>
+
+  {Object.entries(
+    roadmapData?.database?.fields || {}
+  ).map(([table, fields]) => (
+    <div key={table} className="mb-4">
+      <p className="text-purple-300 font-medium">
+        {table}
+      </p>
+
+      <ul className="ml-4 mt-2 space-y-1">
+        {fields.map((field, idx) => (
+          <li key={idx}>• {field}</li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</div>
+
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 max-h-[500px] overflow-y-auto">
                   <h3 className="text-purple-400 mb-6">
                     API Suggestions
                   </h3>
 
                   <ul className="space-y-2">
-                    <li>POST /generate-roadmap</li>
-                    <li>POST /save-project</li>
-                    <li>GET /projects</li>
-                    <li>GET /project/:id</li>
-                  </ul>
+  {roadmapData?.apis?.map((api, index) => (
+    <li key={index}>{api}</li>
+  ))}
+</ul>
                 </div>
               </div>
 
@@ -370,12 +456,88 @@ Deployment
                 </h3>
 
                 <ul className="space-y-2">
-                  <li>Frontend → Vercel</li>
-                  <li>Backend → Render</li>
-                  <li>Database → Railway / MySQL</li>
-                </ul>
+  {roadmapData?.deployment?.map((item, index) => (
+    <li key={index}>{item}</li>
+  ))}
+</ul>
               </div>
-            </div>
+
+<div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6">
+  <h3 className="text-purple-400 text-xl mb-4">
+    Ask AI Mentor
+  </h3>
+
+  <textarea
+  value={question}
+  onChange={(e) => setQuestion(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleAskAI();
+    }
+  }}
+  placeholder="Ask anything about this roadmap..."
+  rows="4"
+    className="
+      w-full
+      bg-white/5
+      border
+      border-white/10
+      rounded-xl
+      p-4
+      mb-4
+      focus:outline-none
+      focus:border-purple-500
+    "
+  />
+
+  <button
+    onClick={handleAskAI}
+    className="
+      bg-purple-600
+      px-6
+      py-3
+      rounded-xl
+      hover:bg-purple-700
+      transition
+    "
+  >
+    Ask AI
+  </button>
+
+  {asking && (
+    <p className="mt-4 text-gray-400">
+      Thinking...
+    </p>
+  )}
+
+  {messages.map((msg, index) => (
+  <div
+    key={index}
+    className={`flex ${
+      msg.role === "user"
+        ? "justify-end"
+        : "justify-start"
+    }`}
+  >
+    <div
+      className={
+        msg.role === "user"
+          ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 p-4 rounded-2xl max-w-[75%]"
+          : "bg-white/10 border border-white/10 p-4 rounded-2xl max-w-[75%]"
+      }
+    >
+      <p className="whitespace-pre-wrap">
+        {msg.content}
+      </p>
+    </div>
+  </div>
+))}
+    <div ref={chatEndRef}></div>
+  </div>
+
+</div>
+
           )}
         </div>
       </div>
