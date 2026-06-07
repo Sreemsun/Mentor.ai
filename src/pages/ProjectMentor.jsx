@@ -242,7 +242,8 @@ setQuestion("");
                 onChange={(e) => setExperienceLevel(e.target.value)}
                 className="
                   w-full
-                  bg-white/5
+                  bg-zinc-900
+                  text-white
                   backdrop-blur-md
                   border
                   border-white/10

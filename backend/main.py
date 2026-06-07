@@ -2,8 +2,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.placement import router as placement_router
 from routes.project import router as project_router
+from routes.placement_chat import router as placement_chat_router
+
 
 app = FastAPI()
+
+app.include_router(
+    placement_chat_router,
+    prefix="/api/placement"
+)
 app.include_router(
     placement_router,
     prefix="/api/placement",

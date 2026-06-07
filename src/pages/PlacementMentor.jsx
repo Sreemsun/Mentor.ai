@@ -10,7 +10,9 @@ export default function PlacementMentor() {
   const [skills, setSkills] = useState("");
   const [interests, setInterests] = useState("");
   const [targetRole, setTargetRole] = useState("");
-
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [asking, setAsking] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [careerData, setCareerData] = useState(null);
@@ -39,6 +41,13 @@ export default function PlacementMentor() {
       const data = await response.json();
 
       setCareerData(data);
+      setMessages([
+  {
+    role: "assistant",
+    content:
+      "Hi! I'm your Placement Mentor. Ask me anything about placements, internships, skills, interviews, resumes, or career planning."
+  }
+]);
       setShowResult(true);
     } catch (error) {
       console.error(error);
@@ -47,7 +56,47 @@ export default function PlacementMentor() {
 
     setLoading(false);
   };
+  const handleAskAI = async () => {
+  if (!question.trim()) return;
 
+  try {
+    setAsking(true);
+
+    const response = await fetch(
+      "http://127.0.0.1:8000/api/placement/ask",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          careerData,
+          question,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: question,
+      },
+      {
+        role: "assistant",
+        content: data.answer,
+      },
+    ]);
+
+    setQuestion("");
+  } catch (error) {
+    console.error(error);
+  }
+
+  setAsking(false);
+};
   return (
     <div className="min-h-screen bg-black text-white">
 
@@ -94,7 +143,7 @@ export default function PlacementMentor() {
             <select
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="w-full p-4 rounded-xl bg-white/5 border border-white/10"
+              className="w-full p-4 rounded-xl bg-zinc-900 text-white border border-white/10"
             >
               <option value="">Select Year</option>
               <option>1st Year</option>
@@ -154,8 +203,32 @@ export default function PlacementMentor() {
         )}
 
         {/* RESULTS */}
-        {showResult && careerData && (
-          <div className="mt-10 grid md:grid-cols-2 gap-6">
+{showResult && careerData && (
+  <>
+    <div className="bg-white/5 border border-white/10 rounded-2xl p-8 mb-6 text-center">
+      <h3 className="text-purple-400 text-xl mb-4">
+        Career Readiness Score
+      </h3>
+
+      <div
+        className={`text-6xl font-bold ${
+          careerData?.careerScore >= 80
+            ? "text-green-400"
+            : careerData?.careerScore >= 60
+            ? "text-yellow-400"
+            : "text-red-400"
+        }`}
+      >
+        {careerData?.careerScore}/100
+      </div>
+
+      <p className="text-gray-400 mt-3">
+        Based on your current profile and target role.
+      </p>
+    </div>
+
+    {/* CARDS */}
+    <div className="mt-10 grid md:grid-cols-2 gap-6">
 
             <div className="bg-white/5 p-6 rounded-2xl">
               <h3 className="text-purple-400 mb-4">
@@ -208,18 +281,71 @@ export default function PlacementMentor() {
             </div>
 
             <div className="bg-white/5 p-6 rounded-2xl">
-              <h3 className="text-purple-400 mb-4">
-                Internship Strategy
-              </h3>
+  <h3 className="text-purple-400 mb-4">
+    Internship Strategy
+  </h3>
 
-              {careerData.internshipStrategy?.map((item, index) => (
-                <p key={index}>• {item}</p>
-              ))}
-            </div>
+  {careerData.internshipStrategy?.map((item, index) => (
+    <p key={index}>• {item}</p>
+  ))}
+</div>
 
-          </div>
-        )}
+<div className="bg-white/5 p-6 rounded-2xl">
+  <h3 className="text-purple-400 mb-4">
+    Learning Resources
+  </h3>
+
+  {careerData.learningResources?.map((resource, index) => (
+    <p key={index}>• {resource}</p>
+  ))}
+</div>
+</div>
+</>
+)}
+<div className="mt-10 bg-white/5 p-6 rounded-2xl">
+  <h3 className="text-purple-400 text-xl mb-4">
+    Ask Placement Mentor
+  </h3>
+
+  <textarea
+    value={question}
+    onChange={(e) => setQuestion(e.target.value)}
+    placeholder="Ask about interviews, resumes, internships..."
+    rows="4"
+    className="w-full p-4 rounded-xl bg-white/5 border border-white/10"
+  />
+
+  <button
+    onClick={handleAskAI}
+    className="mt-4 bg-purple-600 px-6 py-3 rounded-xl"
+  >
+    Ask AI
+  </button>
+
+  {asking && (
+    <p className="mt-4 text-gray-400">
+      Thinking...
+    </p>
+  )}
+
+  <div className="mt-6 space-y-4">
+    {messages.map((msg, index) => (
+      <div
+        key={index}
+        className={
+          msg.role === "user"
+            ? "bg-purple-600 p-4 rounded-xl ml-auto max-w-[80%]"
+            : "bg-white/10 p-4 rounded-xl max-w-[80%]"
+        }
+      >
+        <div className="whitespace-pre-wrap leading-5">
+  {msg.content}
+</div>
       </div>
-    </div>
+    ))}
+  </div>
+</div>
+            </div> 
+      </div>
   );
 }
