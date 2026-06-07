@@ -179,8 +179,8 @@ setQuestion("");
             Back
           </button>
 
-          <h2 className="text-2xl font-bold text-purple-300">
-            LaunchPad AI
+          <h2 className="text-2xl font-bold text-white font-mono">
+            Mentor.ai
           </h2>
 
           <div className="w-[100px]" />

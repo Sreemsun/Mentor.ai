@@ -9,7 +9,7 @@ export default function Navbar() {
         <li className="hover:text-purple-400 cursor-pointer">Home</li>
         <li className="hover:text-purple-400 cursor-pointer">About</li>
         <li className="hover:text-purple-400 cursor-pointer">Saved</li>
-        <li onClick={() => navigate("/project")} className="hover:text-purple-400 cursor-pointer">Contact</li>
+        <li onClick={() => navigate("/Project")} className="hover:text-purple-400 cursor-pointer">Contact</li>
       </ul>
     </nav>
   );
