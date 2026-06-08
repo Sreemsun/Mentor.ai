@@ -85,14 +85,6 @@ Students can ask follow-up questions about:
 
 ---
 
-## Live Demo
-
-Frontend:
-
-YOUR_VERCEL_LINK
-
----
-
 ## GitHub Repository
 
 YOUR_GITHUB_LINK
